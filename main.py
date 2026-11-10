@@ -6,17 +6,23 @@ from pathlib import Path
 
 from config import ConfigError, load_config, DEFAULT_CONFIG_PATH
 from scraper import ScrapeError, find_preferred, get_sections
-from ui import ask_save_dir, choose_parts, resource_folder_name
+from ui import ask_save_dir, ask_url, choose_parts, resource_folder_name
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Download automation tool")
     ap.add_argument("--config", type=Path, default=DEFAULT_CONFIG_PATH)
+    ap.add_argument("--url", help="Page URL (skips the prompt)")
     args = ap.parse_args()
+
+    url = args.url or ask_url()
+    if not url:
+        print("Cancelled.")
+        return 0
 
     try:
         cfg = load_config(args.config)
-        sections = get_sections(cfg)
+        sections = get_sections(url, cfg)
     except (ConfigError, ScrapeError) as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1

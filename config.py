@@ -16,7 +16,6 @@ class ConfigError(Exception):
 
 @dataclass
 class Config:
-    url: str
     header_text: str
     section_div_class: str
     default_dir: str
@@ -45,7 +44,6 @@ def load_config(path: Path = DEFAULT_CONFIG_PATH) -> Config:
     behavior = raw.get("behavior", {})
 
     return Config(
-        url=_require(site, "url", "site"),
         header_text=_require(site, "header_text", "site"),
         section_div_class=_require(site, "section_div_class", "site"),
         default_dir=_require(download, "default_dir", "download"),

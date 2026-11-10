@@ -96,9 +96,9 @@ def parse_sections(html: str, header_text: str, div_class: str, base_url: str) -
     return sections
 
 
-def get_sections(cfg) -> list[Section]:
-    html = fetch_html(cfg.url)
-    return parse_sections(html, cfg.header_text, cfg.section_div_class, cfg.url)
+def get_sections(url: str, cfg) -> list[Section]:
+    html = fetch_html(url)
+    return parse_sections(html, cfg.header_text, cfg.section_div_class, url)
 
 
 def find_preferred(sections: list[Section], preferred: str) -> Section | None:

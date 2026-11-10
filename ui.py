@@ -24,6 +24,19 @@ def resource_folder_name(part_names: list[str]) -> str:
     return sanitize(Path(part_names[0]).stem) if part_names else "download"
 
 
+def _valid_url(value: str):
+    v = value.strip()
+    if v.lower().startswith(("http://", "https://")) and "." in v:
+        return True
+    return "Enter a full URL starting with http:// or https://"
+
+
+def ask_url():
+    """Prompt for the page URL. Returns None if cancelled."""
+    answer = questionary.text("Paste the page URL:", validate=_valid_url).ask()
+    return answer.strip() if answer else None
+
+
 def choose_parts(parts):
     """Checkbox list, all pre-ticked. Returns the chosen parts (possibly empty), or None if cancelled."""
     choices = [questionary.Choice(title=p.name, value=p, checked=True) for p in parts]
