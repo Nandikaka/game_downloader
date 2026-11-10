@@ -1,14 +1,16 @@
-"""CLI entry: scrape -> preferred hoster -> pick parts -> choose folder.
-Downloading from the hoster needs the provider handler (next milestone).
+"""CLI entry: scrape -> preferred hoster -> pick parts -> choose folder -> resolve + download.
+Each part link is resolved by its provider handler right before it is downloaded.
 Dev option: --test-url downloads direct file URLs to exercise the downloader."""
 import argparse
 import sys
+from functools import partial
 from pathlib import Path
 from urllib.parse import urlparse
 
 from batch import BatchItem, run_batch
 from config import ConfigError, load_config, DEFAULT_CONFIG_PATH
 from downloader import ResolvedLink
+from providers import resolve_part
 from scraper import ScrapeError, find_preferred, get_sections
 from ui import ask_save_dir, ask_url, choose_parts, resource_folder_name
 
@@ -76,8 +78,11 @@ def main() -> int:
     print(f"\n{len(chosen)} part(s) selected. Files will be saved to:\n  {save_dir}")
     for p in chosen:
         print(f"  - {p.name}")
-    print("\n(Downloading from the hoster needs the provider handler, coming in the next milestone.)")
-    return 0
+    print()
+
+    items = [BatchItem(p.name, resolve=partial(resolve_part, p.url)) for p in chosen]
+    summary = run_batch(items, save_dir, cfg.retries, cfg.delay)
+    return 1 if summary.failed else 0
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 """Sequential batch runner: overall + per-file progress, delay, retry-at-end."""
 import time
 from dataclasses import dataclass
+from typing import Callable, Optional
 
 from rich.console import Console, Group
 from rich.live import Live
@@ -11,12 +12,14 @@ from rich.progress import (BarColumn, DownloadColumn, MofNCompleteColumn, Progre
 from rich.table import Column
 
 from downloader import DownloadResult, ProgressSink, ResolvedLink, download_file
+from providers import ResolveError
 
 
 @dataclass
 class BatchItem:
-    name: str            # name shown / fallback filename (the page's part name)
-    link: ResolvedLink
+    name: str                                   # name shown / fallback filename (the page's part name)
+    link: Optional[ResolvedLink] = None         # ready-to-download link (e.g. --test-url)
+    resolve: Optional[Callable[[], ResolvedLink]] = None  # or resolve lazily, just before download
 
 
 @dataclass
@@ -72,7 +75,16 @@ def _run_round(indexed, dest_dir, retries, delay, backoff, console):
         for pos, (idx, item) in enumerate(indexed):
             sink.begin(item.name)
             try:
-                res = download_file(item.link, dest_dir, item.name, retries, sink, backoff)
+                link = item.link
+                if link is None:
+                    sink.status(f"Resolving {item.name}")
+                    link = item.resolve()
+                res = download_file(link, dest_dir, item.name, retries, sink, backoff)
+            except ResolveError as e:
+                res = DownloadResult(item.name, "failed", error=f"Could not resolve link: {e}")
+            except Exception as e:  # a handler bug must not abort the whole batch
+                res = DownloadResult(item.name, "failed",
+                                     error=f"Resolver error ({type(e).__name__}): {e}")
             finally:
                 sink.end()
             results[idx] = res
