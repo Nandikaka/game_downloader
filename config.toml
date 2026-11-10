@@ -1,0 +1,15 @@
+[site]
+url = "https://fitgirl-repacks.site/god-of-war-3-remastered/"
+header_text = "Download Mirrors (Direct Links)"  
+section_div_class = "su-spoiler-content su-u-clearfix su-u-trim"
+
+[download]
+default_dir = "C:/Games"
+subfolder_per_section = true
+
+[providers]
+preferred = "FuckingFast"
+
+[behavior]
+sequential = true
+retries = 3
