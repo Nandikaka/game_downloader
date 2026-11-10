@@ -12,3 +12,4 @@ preferred = "FuckingFast"
 [behavior]
 sequential = true
 retries = 3
+delay_between_files = 1.0

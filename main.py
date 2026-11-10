@@ -1,10 +1,14 @@
-"""CLI entry. Milestones 1-3: scrape, go straight to the preferred hoster,
-pick parts, choose the save folder. (Downloading comes in later milestones.)"""
+"""CLI entry: scrape -> preferred hoster -> pick parts -> choose folder.
+Downloading from the hoster needs the provider handler (next milestone).
+Dev option: --test-url downloads direct file URLs to exercise the downloader."""
 import argparse
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
+from batch import BatchItem, run_batch
 from config import ConfigError, load_config, DEFAULT_CONFIG_PATH
+from downloader import ResolvedLink
 from scraper import ScrapeError, find_preferred, get_sections
 from ui import ask_save_dir, ask_url, choose_parts, resource_folder_name
 
@@ -13,7 +17,25 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Download automation tool")
     ap.add_argument("--config", type=Path, default=DEFAULT_CONFIG_PATH)
     ap.add_argument("--url", help="Page URL (skips the prompt)")
+    ap.add_argument("--test-url", nargs="+", metavar="FILE_URL",
+                    help="Dev: download direct file URL(s), skipping the scraper")
     args = ap.parse_args()
+
+    try:
+        cfg = load_config(args.config)
+    except ConfigError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+    if args.test_url:
+        save_dir = ask_save_dir(cfg.default_dir)
+        if save_dir is None:
+            print("Cancelled.")
+            return 0
+        items = [BatchItem(Path(urlparse(u).path).name or "file", ResolvedLink(url=u))
+                 for u in args.test_url]
+        summary = run_batch(items, save_dir, cfg.retries, cfg.delay)
+        return 1 if summary.failed else 0
 
     url = args.url or ask_url()
     if not url:
@@ -21,9 +43,8 @@ def main() -> int:
         return 0
 
     try:
-        cfg = load_config(args.config)
         sections = get_sections(url, cfg)
-    except (ConfigError, ScrapeError) as e:
+    except ScrapeError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
 
@@ -49,14 +70,13 @@ def main() -> int:
     if save_dir is None:
         print("Cancelled.")
         return 0
-
     if cfg.subfolder_per_section:
         save_dir = save_dir / resource_folder_name([p.name for p in chosen])
 
     print(f"\n{len(chosen)} part(s) selected. Files will be saved to:\n  {save_dir}")
     for p in chosen:
         print(f"  - {p.name}")
-    print("\n(Downloading is not implemented yet.)")
+    print("\n(Downloading from the hoster needs the provider handler, coming in the next milestone.)")
     return 0
 
 

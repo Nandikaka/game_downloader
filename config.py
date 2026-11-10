@@ -23,6 +23,7 @@ class Config:
     preferred_provider: str
     sequential: bool
     retries: int
+    delay: float
 
 
 def _require(table: dict, key: str, section: str):
@@ -51,4 +52,5 @@ def load_config(path: Path = DEFAULT_CONFIG_PATH) -> Config:
         preferred_provider=providers.get("preferred", "FuckingFast"),
         sequential=behavior.get("sequential", True),
         retries=int(behavior.get("retries", 3)),
+        delay=float(behavior.get("delay_between_files", 1.0)),
     )

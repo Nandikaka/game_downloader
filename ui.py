@@ -4,14 +4,9 @@ from pathlib import Path
 
 import questionary
 
-ILLEGAL_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+from utils import sanitize
+
 PART_SUFFIX = re.compile(r"[._\-\s]*part\s*0*\d+.*$", re.IGNORECASE)
-
-
-def sanitize(name: str, max_len: int = 100) -> str:
-    """Strip Windows-illegal characters and trailing dots/spaces."""
-    cleaned = ILLEGAL_CHARS.sub("", name).strip().rstrip(". ")
-    return cleaned[:max_len].rstrip(". ") or "download"
 
 
 def resource_folder_name(part_names: list[str]) -> str:
