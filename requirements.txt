@@ -3,3 +3,4 @@ beautifulsoup4>=4.12
 tomli>=2.0; python_version < "3.11"
 questionary>=2.0
 rich>=13.7
+playwright>=1.44

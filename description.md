@@ -102,7 +102,7 @@ The page URL is **not** stored in the config. It is entered at run time.
 
 ## What still needs to be built
 
-### 1. Provider handler layer (the main missing piece)
+### 1. Provider handler layer (built for fuckingfast.co; add more handlers as needed)
 
 The part links found by the scraper are pages on a hosting site, not direct file URLs, so the normal flow currently stops after the folder prompt and prints a summary.
 
@@ -140,3 +140,16 @@ The part links found by the scraper are pages on a hosting site, not direct file
 - The scraper assumes the structure `h3` then `ul` then `li` then `div.<class>` then `a`. Different pages will need config changes or edits to `scraper.py`.
 - Section names come from raw `<li>` text and can be long or noisy.
 - The size check is the only integrity check.
+
+## Browser-based link resolution (Playwright)
+
+`providers/fuckingfast.py` opens each part page in a shared headless Chromium (`providers/browser.py`),
+clicks DOWNLOAD (a second time if no link appears), and captures the `https://dl.fuckingfast.co/dl/...`
+link by intercepting the browser's request, which is aborted so the browser never downloads the file.
+The link, the browser's user agent and the site cookies go to `downloader.py` in a `ResolvedLink`.
+
+- Every part gets a brand-new browser (nothing stored on disk), closed as soon as the link is captured, before the real download starts.
+- If headless fails for a part, that part is retried once with a visible window (`fallback_to_headed`, `headed_timeout`) so a Cloudflare box can be ticked by hand; the next part starts headless again.
+- Setup: `pip install -r requirements.txt` then `playwright install chromium`.
+- Check one link without downloading: `python main.py --resolve-only <part page URL>`.
+- `[browser]` config: `headless`, `timeout`, `fallback_to_headed`, `headed_timeout`.

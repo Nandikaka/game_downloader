@@ -24,6 +24,10 @@ class Config:
     sequential: bool
     retries: int
     delay: float
+    headless: bool = True
+    browser_timeout: float = 30.0
+    fallback_to_headed: bool = True
+    headed_timeout: float = 120.0
 
 
 def _require(table: dict, key: str, section: str):
@@ -43,6 +47,7 @@ def load_config(path: Path = DEFAULT_CONFIG_PATH) -> Config:
     download = raw.get("download", {})
     providers = raw.get("providers", {})
     behavior = raw.get("behavior", {})
+    browser = raw.get("browser", {})
 
     return Config(
         header_text=_require(site, "header_text", "site"),
@@ -53,4 +58,8 @@ def load_config(path: Path = DEFAULT_CONFIG_PATH) -> Config:
         sequential=behavior.get("sequential", True),
         retries=int(behavior.get("retries", 3)),
         delay=float(behavior.get("delay_between_files", 1.0)),
+        headless=bool(browser.get("headless", True)),
+        browser_timeout=float(browser.get("timeout", 30.0)),
+        fallback_to_headed=bool(browser.get("fallback_to_headed", True)),
+        headed_timeout=float(browser.get("headed_timeout", 120.0)),
     )

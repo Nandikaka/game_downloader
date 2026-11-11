@@ -6,6 +6,9 @@ from urllib.parse import urlparse
 from downloader import ResolvedLink
 
 from .base import NoHandlerError, ProviderHandler, ResolveError
+from .browser import BrowserSettings
+from .browser import configure as configure_browser
+from .browser import shutdown as shutdown_browser
 from .fuckingfast import FuckingFastHandler
 
 _HANDLERS: list[ProviderHandler] = [FuckingFastHandler()]
@@ -32,4 +35,5 @@ def resolve_part(part_url: str) -> ResolvedLink:
     return handler.resolve(part_url)
 
 
-__all__ = ["resolve_part", "get_handler", "ResolveError", "NoHandlerError"]
+__all__ = ["resolve_part", "get_handler", "ResolveError", "NoHandlerError",
+           "BrowserSettings", "configure_browser", "shutdown_browser"]

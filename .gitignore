@@ -1,2 +1,35 @@
-__pycache__
-venv
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+bin/
+include/
+lib/
+lib64/
+pyvenv.cfg
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Local configuration (if it contains secrets)
+# config.toml

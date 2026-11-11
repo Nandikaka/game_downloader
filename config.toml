@@ -13,3 +13,9 @@ preferred = "FuckingFast"
 sequential = true
 retries = 3
 delay_between_files = 1.0
+
+[browser]
+headless = true            # try without a window first
+timeout = 30               # seconds: page load, button wait, link wait
+fallback_to_headed = true  # if headless fails before any success, retry with a window
+headed_timeout = 120       # seconds allowed for the headed retry (time to tick a Cloudflare box)
